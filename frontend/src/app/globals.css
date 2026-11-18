@@ -1,0 +1,75 @@
+@import url("https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@500;600;700;800&display=swap");
+
+:root {
+  color-scheme: light;
+  --ink: #152b2a;
+  --muted: #607270;
+  --line: #dce7e4;
+  --paper: #ffffff;
+  --canvas: #f2f7f5;
+  --green: #157664;
+  --green-dark: #10584e;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: var(--canvas);
+  color: var(--ink);
+  font-family: "DM Sans", sans-serif;
+}
+
+button, input, select { font: inherit; }
+
+.shell { max-width: 1160px; margin: 0 auto; padding: 46px 28px 32px; }
+.page-header { display: flex; justify-content: space-between; align-items: end; gap: 28px; }
+.eyebrow { margin: 0 0 8px; color: var(--green); font-size: .72rem; font-weight: 700; letter-spacing: .13em; }
+h1, h2 { font-family: "Manrope", sans-serif; letter-spacing: -.035em; }
+h1 { margin: 0; font-size: clamp(1.8rem, 3vw, 2.45rem); }
+h2 { margin: 0; font-size: 1.24rem; }
+.lede { margin: 9px 0 0; color: var(--muted); }
+.key-entry { width: min(320px, 100%); }
+label { display: grid; gap: 7px; color: #35504d; font-size: .86rem; font-weight: 600; }
+input, select { width: 100%; min-width: 0; border: 1px solid #cbd9d5; border-radius: 7px; padding: 11px 12px; color: var(--ink); background: white; outline: none; }
+input:focus, select:focus { border-color: var(--green); box-shadow: 0 0 0 3px #15766420; }
+.notice { min-height: 23px; margin: 18px 0 10px; color: var(--green-dark); font-size: .9rem; }
+.panel { margin-top: 16px; padding: 24px; background: var(--paper); border: 1px solid var(--line); border-radius: 13px; box-shadow: 0 5px 20px #163c3110; }
+.section-heading { display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+.privacy-note { color: var(--muted); font-size: .8rem; }
+.lead-form { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 18px; margin-top: 23px; }
+.primary-button, .secondary-button { border-radius: 7px; padding: 11px 16px; font-weight: 700; cursor: pointer; }
+.primary-button { border: 1px solid var(--green); background: var(--green); color: white; }
+.primary-button:hover:not(:disabled) { background: var(--green-dark); }
+.primary-button:disabled, .secondary-button:disabled { cursor: not-allowed; opacity: .5; }
+.submit-button { grid-column: 1 / -1; margin-top: 2px; }
+.secondary-button { border: 1px solid var(--line); background: white; color: var(--ink); }
+.secondary-button:hover:not(:disabled) { border-color: var(--green); }
+.log-panel { margin-top: 22px; }
+.table-scroll { overflow-x: auto; margin: 19px -2px 0; }
+table { width: 100%; border-collapse: collapse; text-align: left; font-size: .85rem; }
+th { padding: 12px 10px; color: var(--muted); font-size: .72rem; letter-spacing: .06em; text-transform: uppercase; border-bottom: 1px solid var(--line); white-space: nowrap; }
+td { padding: 14px 10px; border-bottom: 1px solid #edf2f0; vertical-align: top; }
+.status { display: inline-block; border-radius: 20px; padding: 4px 8px; font-size: .68rem; font-weight: 700; letter-spacing: .04em; }
+.status-success { background: #e4f5ee; color: #17684f; }
+.status-failed { background: #fff0ed; color: #a63c2b; }
+.status-processing { background: #fff5db; color: #896219; }
+.error-text { max-width: 240px; margin: 6px 0 0; color: #a63c2b; font-size: .75rem; }
+.mono { color: #536663; font-family: ui-monospace, SFMono-Regular, Consolas, monospace; font-size: .76rem; }
+.text-button { padding: 0; border: 0; color: var(--green); background: transparent; font-weight: 700; cursor: pointer; }
+.empty-state { padding: 20px 0 4px; color: var(--muted); }
+footer { padding: 20px 0 4px; color: #71817e; font-size: .78rem; text-align: center; }
+
+@media (max-width: 760px) {
+  .shell { padding: 30px 16px; }
+  .page-header { align-items: stretch; flex-direction: column; }
+  .key-entry { width: 100%; }
+  .lead-form { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .panel { padding: 19px; }
+}
+
+@media (max-width: 520px) {
+  .lead-form { grid-template-columns: 1fr; }
+  .submit-button { grid-column: auto; }
+  .section-heading { align-items: start; flex-direction: column; }
+}
