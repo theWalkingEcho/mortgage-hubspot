@@ -40,6 +40,13 @@ class MortgageLeadPayload(BaseModel):
         return value.strip()
 
 
+class AdminLoginPayload(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    username: str
+    api_key: str = Field(min_length=1)
+
+
 @dataclass(frozen=True)
 class Settings:
     supabase_url: str | None
@@ -488,6 +495,16 @@ def create_app(
         supplied = authorization.removeprefix("Bearer ").strip() if authorization else ""
         if not secrets.compare_digest(supplied, configured.admin_api_key):
             raise HTTPException(status_code=401, detail="Invalid API key")
+
+    @application.post("/api/v1/auth/login")
+    async def admin_login(payload: AdminLoginPayload) -> dict[str, bool]:
+        if not configured.admin_api_key:
+            raise HTTPException(status_code=503, detail="ADMIN_API_KEY is not configured")
+        if payload.username != "admin" or not secrets.compare_digest(
+            payload.api_key, configured.admin_api_key
+        ):
+            raise HTTPException(status_code=401, detail="Invalid username or API key")
+        return {"authenticated": True}
 
     @application.get("/api/health")
     async def health() -> dict[str, str]:

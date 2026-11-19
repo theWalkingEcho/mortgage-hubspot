@@ -138,6 +138,27 @@ def test_admin_routes_reject_missing_or_invalid_key():
     assert client.get("/api/v1/logs", headers=auth_headers("wrong")).status_code == 401
 
 
+def test_admin_login_accepts_admin_and_valid_api_key():
+    response = make_client().post(
+        "/api/v1/auth/login",
+        json={"username": "admin", "api_key": "demo-admin-key"},
+    )
+    assert response.status_code == 200
+    assert response.json() == {"authenticated": True}
+
+
+@pytest.mark.parametrize(
+    "credentials",
+    [
+        {"username": "operator", "api_key": "demo-admin-key"},
+        {"username": "admin", "api_key": "wrong"},
+    ],
+)
+def test_admin_login_rejects_invalid_credentials(credentials):
+    response = make_client().post("/api/v1/auth/login", json=credentials)
+    assert response.status_code == 401
+
+
 @pytest.mark.parametrize(
     "updates",
     [
