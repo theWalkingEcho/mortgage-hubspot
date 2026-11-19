@@ -32,26 +32,38 @@ const initialForm: LeadForm = {
   referral_partner: "Direct",
 };
 
-const apiBase = (process.env.NEXT_PUBLIC_API_URL || "").replace(/\/$/, "");
+const configuredApiBase = (process.env.NEXT_PUBLIC_API_URL || "").replace(/\/$/, "");
+const apiBase =
+  configuredApiBase ||
+  (process.env.NODE_ENV === "development" ? "http://127.0.0.1:8000" : "");
 
 export default function OpsDashboard() {
   const [logs, setLogs] = useState<WebhookLog[]>([]);
   const [form, setForm] = useState(initialForm);
   const [apiKey, setApiKey] = useState("");
+  const [username, setUsername] = useState("admin");
+  const [loginKey, setLoginKey] = useState("");
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
 
   const request = useCallback(
     async (path: string, init?: RequestInit) => {
       if (!apiBase) throw new Error("Set NEXT_PUBLIC_API_URL in the frontend deployment.");
-      const response = await fetch(`${apiBase}${path}`, {
-        ...init,
-        headers: {
-          Authorization: `Bearer ${apiKey}`,
-          "Content-Type": "application/json",
-          ...(init?.headers || {}),
-        },
-      });
+      let response: Response;
+      try {
+        response = await fetch(`${apiBase}${path}`, {
+          ...init,
+          headers: {
+            ...(apiKey ? { Authorization: `Bearer ${apiKey}` } : {}),
+            "Content-Type": "application/json",
+            ...(init?.headers || {}),
+          },
+        });
+      } catch {
+        throw new Error(
+          `Could not connect to the API at ${apiBase}. Check that the backend is running and accessible.`,
+        );
+      }
       const result = await response.json();
       if (!response.ok) {
         throw new Error(result.detail || `Request failed (${response.status})`);
@@ -60,6 +72,25 @@ export default function OpsDashboard() {
     },
     [apiKey],
   );
+
+  async function handleLogin(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    setLoading(true);
+    setMessage("");
+    try {
+      await request("/api/v1/auth/login", {
+        method: "POST",
+        body: JSON.stringify({ username, api_key: loginKey }),
+      });
+      setApiKey(loginKey);
+      setLoginKey("");
+      setMessage("Signed in successfully.");
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : "Sign-in failed.");
+    } finally {
+      setLoading(false);
+    }
+  }
 
   const fetchLogs = useCallback(async () => {
     const data = (await request("/api/v1/logs")) as WebhookLog[];
@@ -136,6 +167,12 @@ export default function OpsDashboard() {
     }
   }
 
+  function handleLogout() {
+    setApiKey("");
+    setLogs([]);
+    setMessage("");
+  }
+
   return (
     <main className="shell">
       <header className="page-header">
@@ -146,23 +183,53 @@ export default function OpsDashboard() {
             Submit a demo lead and monitor its contact, deal, and audit-log sync.
           </p>
         </div>
-        <div className="key-entry">
-          <label htmlFor="api-key">Dashboard API key</label>
-          <input
-            id="api-key"
-            type="password"
-            autoComplete="current-password"
-            placeholder="Enter ADMIN_API_KEY"
-            value={apiKey}
-            onChange={(event) => setApiKey(event.target.value)}
-          />
-        </div>
+        {apiKey && (
+          <button className="secondary-button" onClick={handleLogout}>
+            Sign out
+          </button>
+        )}
       </header>
 
       <p className="notice" role="status" aria-live="polite">
         {message}
       </p>
 
+      {!apiKey ? (
+        <section className="panel login-panel">
+          <div className="section-heading">
+            <div>
+              <p className="eyebrow">ADMIN ACCESS</p>
+              <h2>Sign in to the dashboard</h2>
+            </div>
+          </div>
+          <form className="login-form" onSubmit={handleLogin}>
+            <label>
+              Admin username
+              <input
+                required
+                autoComplete="username"
+                value={username}
+                onChange={(event) => setUsername(event.target.value)}
+              />
+            </label>
+            <label>
+              Admin API key
+              <input
+                required
+                type="password"
+                autoComplete="current-password"
+                placeholder="Enter ADMIN_API_KEY"
+                value={loginKey}
+                onChange={(event) => setLoginKey(event.target.value)}
+              />
+            </label>
+            <button className="primary-button" disabled={loading}>
+              {loading ? "Signing in…" : "Sign in"}
+            </button>
+          </form>
+        </section>
+      ) : (
+      <>
       <section className="panel">
         <div className="section-heading">
           <div>
@@ -316,6 +383,8 @@ export default function OpsDashboard() {
         )}
       </section>
       <footer>Internal demo dashboard · Refreshes every 8 seconds</footer>
+      </>
+      )}
     </main>
   );
 }

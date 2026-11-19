@@ -75,7 +75,7 @@ $env:NEXT_PUBLIC_API_URL = "http://127.0.0.1:8000"
 npm run dev
 ```
 
-Open `http://localhost:3000` and enter the backend `ADMIN_API_KEY` in the dashboard. The dashboard API key stays in page state and is not written to local storage.
+Open `http://localhost:3000` and sign in with username `admin` and the backend `ADMIN_API_KEY`. In local development, the frontend defaults to `http://127.0.0.1:8000` if `NEXT_PUBLIC_API_URL` is unset; make sure the backend is running there. The dashboard API key stays in page state and is not written to local storage.
 The frontend requires Node.js 20.9 or later; Node 22 LTS is recommended.
 
 ## 4. Deploy as two Vercel projects
@@ -101,6 +101,7 @@ After both are deployed, set the exact frontend origin in the backend's `FRONTEN
 ## API routes
 
 - `GET /api/health` — public liveness check.
+- `POST /api/v1/auth/login` — verify the admin username and API key.
 - `POST /api/v1/ingest-lead` — validate and sync one lead; requires the admin bearer key.
 - `GET /api/v1/logs` — read the latest 50 audit records; requires the admin bearer key.
 - `POST /api/v1/logs/{event_id}/retry` — retry a failed or stale processing event; requires the admin bearer key.
